@@ -2,7 +2,7 @@
 
 ## Description
 
-- USDC.e (zkEVM) - This contract will match the current USDC contract deployed on Ethereum, with all expected features. Its contract address will be different from the current “wrapped” USDC in use today, and will have the ability to issue and burn tokens as well as “blacklist” addresses.
+- USDC.e (zkEVM) - This contract will match the current USDC contract deployed on Ethereum, with all expected features. Its contract address will be different from the current "wrapped" USDC in use today, and will have the ability to issue and burn tokens as well as "blacklist" addresses.
 
 ## Contracts
 
