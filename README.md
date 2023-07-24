@@ -18,3 +18,17 @@
 [Arbitrum FiatTokenV2_1](https://arbiscan.io/address/0x0f4fb9474303d10905ab86aa8d5a65fe44b6e04a#code)
 
 NOTE: contracts in `usdc-proxy/` and `usdc-impl/` are copies from Arbitrum, because they are more up to date.
+
+## Deployment
+
+First, copy `.env.example` to `.env` and set the appropriate environment variables
+
+Run the following command to simulate the FiatTokenV1_1.sol deployment locally using Foundry
+
+`forge script script/usdc.s.sol:USDCScript -vvvv`
+
+To deploy to a particular chain, and verify the contract on Etherscan, 
+
+```bash
+forge script script/usdc.s.sol:USDCScript --fork-url ${RPC_URL} --broadcast --verify -vvvv
+```
