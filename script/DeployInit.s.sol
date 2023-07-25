@@ -25,12 +25,26 @@ pragma solidity 0.6.12;
 import "forge-std/Script.sol";
 import "../src/usdc-impl/FiatTokenV2_1.sol";
 
-contract USDCScript is Script {
+contract DeployInitUSDC is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
-        new FiatTokenV2_1();
+        address admin = vm.envAddress("ADDRESS_ADMIN");
+
+        FiatTokenV2_1 usdc = new FiatTokenV2_1();
+        usdc.initialize(
+            "USD Coin",
+            "USDC",
+            "USD",
+            6,
+            admin, // master minter
+            admin, // pauser
+            admin, // blacklister
+            admin // owner
+        );
+        usdc.initializeV2("USD Coin");
+        usdc.initializeV2_1(admin);
 
         vm.stopBroadcast();
     }
