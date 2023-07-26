@@ -25,10 +25,10 @@ First, copy `.env.example` to `.env` and set the appropriate environment variabl
 
 Run the following command to simulate the FiatTokenV1_1.sol deployment locally using Foundry
 
-`forge script script/usdc.s.sol:USDCScript -vvvv`
+`forge script script/DeployInit.s.sol:DeployInitUSDC -vvvv`
 
-To deploy to a particular chain, and verify the contract on Etherscan, 
+To deploy to a particular chain, and verify the contract on Etherscan,
 
 ```bash
-forge script script/usdc.s.sol:USDCScript --fork-url ${RPC_URL} --broadcast --verify -vvvv
+forge script script/DeployInit.s.sol:DeployInitUSDC --fork-url ${RPC_URL} --broadcast --verify -vvvv
 ```
