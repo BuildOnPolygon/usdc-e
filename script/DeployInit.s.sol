@@ -30,7 +30,11 @@ contract DeployInitUSDC is Script {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
-        address admin = vm.envAddress("ADDRESS_ADMIN");
+        // setup the addresses for the various roles
+        address masterMinter = vm.envAddress("ADDRESS_MASTER_MINTER");
+        address pauser = vm.envAddress("ADDRESS_PAUSER");
+        address blacklister = vm.envAddress("ADDRESS_BLACKLISTER");
+        address owner = vm.envAddress("ADDRESS_OWNER");
 
         FiatTokenV2_1 usdc = new FiatTokenV2_1();
         usdc.initialize(
@@ -38,13 +42,15 @@ contract DeployInitUSDC is Script {
             "USDC",
             "USD",
             6,
-            admin, // master minter
-            admin, // pauser
-            admin, // blacklister
-            admin // owner
+            masterMinter,
+            pauser,
+            blacklister,
+            owner
         );
         usdc.initializeV2("USD Coin");
-        usdc.initializeV2_1(admin);
+        // the lostAndFound address here doesn't matter, because there will not be
+        // a nonzero balance on the USDC-e contract (since we just deployed it)
+        usdc.initializeV2_1(address(0));
 
         vm.stopBroadcast();
     }
