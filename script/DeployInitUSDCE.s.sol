@@ -26,7 +26,7 @@ import "forge-std/Script.sol";
 import "../src/usdc-impl/FiatTokenV2_1.sol";
 
 /// @notice This script deploys and initializes the USDC-e token. It also
-/// configured the zkMinterBurnerProxy and the nativeConverterProxy from the usdc-lxly repo
+/// configures the zkMinterBurnerProxy and the nativeConverterProxy from the usdc-lxly repo
 /// as minters. Control of the various USDC-e roles is relinquished to the deployer-provided
 /// addresses
 contract DeployInitUSDCE is Script {
@@ -35,15 +35,35 @@ contract DeployInitUSDCE is Script {
         address deployerAddress = vm.addr(deployerPrivateKey);
         vm.startBroadcast(deployerPrivateKey);
 
+        uint256 minterAllowedAmount = vm.envUint("MINTER_ALLOWED_AMOUNT");
+
+        address masterMinter = vm.envAddress("ADDRESS_MASTER_MINTER");
+        address pauser = vm.envAddress("ADDRESS_PAUSER");
+        address blacklister = vm.envAddress("ADDRESS_BLACKLISTER");
+        address owner = vm.envAddress("ADDRESS_OWNER");
+
         FiatTokenV2_1 usdce = deployUSDCE();
-        initializeAndConfigureMinters(usdce, deployerAddress);
-        relinquishPower(usdce, deployerAddress);
+        initializeAndConfigureMinters(
+            usdce,
+            deployerAddress,
+            minterAllowedAmount
+        );
+        relinquishPower(
+            usdce,
+            deployerAddress,
+            masterMinter,
+            pauser,
+            blacklister,
+            owner
+        );
 
         vm.stopBroadcast();
     }
 
     function deployUSDCE() internal returns (FiatTokenV2_1) {
-        return new FiatTokenV2_1();
+        FiatTokenV2_1 usdce = new FiatTokenV2_1();
+        console.log("Deployed USDCE at address: %s", address(usdce));
+        return usdce;
     }
 
     /// @notice Put the USDC-e token in a state where it is ready to be used
@@ -54,7 +74,8 @@ contract DeployInitUSDCE is Script {
     // the appropriate controller
     function initializeAndConfigureMinters(
         FiatTokenV2_1 usdce,
-        address deployerAddress
+        address deployerAddress,
+        uint256 minterAllowedAmount
     ) internal {
         // we first initialize the token with the deployer as the controller
         // so we can configure the minters. Later on we will relinquish this
@@ -70,15 +91,26 @@ contract DeployInitUSDCE is Script {
             deployerAddress // owner
         );
         usdce.initializeV2("USD Coin");
+        // we pass the 0 address here because `initializeV2_1`'s `lostAndFound`
+        // parameter will not be used, since this is a newly deployed token and
+        // thus we can assume it will have a balance of 0
         usdce.initializeV2_1(address(0));
-
-        uint256 minterAllowedAmount = vm.envUint("MINTER_ALLOWED_AMOUNT");
 
         usdce.configureMinter(
             vm.envAddress("ADDRESS_ZK_MINTER_BURNER_PROXY"),
             minterAllowedAmount
         );
+        console.log(
+            "Configured zkMinterBurnerProxy with address %s as minter with allowance: %s",
+            vm.envAddress("ADDRESS_ZK_MINTER_BURNER_PROXY"),
+            minterAllowedAmount
+        );
         usdce.configureMinter(
+            vm.envAddress("ADDRESS_NATIVE_CONVER_PROXY"),
+            minterAllowedAmount
+        );
+        console.log(
+            "Configured nativeConverter with address %s as minter with allowance: %s",
             vm.envAddress("ADDRESS_NATIVE_CONVER_PROXY"),
             minterAllowedAmount
         );
@@ -88,17 +120,20 @@ contract DeployInitUSDCE is Script {
     /// to the appropriate controllers
     function relinquishPower(
         FiatTokenV2_1 usdce,
-        address deployerAddress
+        address deployerAddress,
+        address masterMinter,
+        address pauser,
+        address blacklister,
+        address owner
     ) public {
-        address masterMinter = vm.envAddress("ADDRESS_MASTER_MINTER");
-        address pauser = vm.envAddress("ADDRESS_PAUSER");
-        address blacklister = vm.envAddress("ADDRESS_BLACKLISTER");
-        address owner = vm.envAddress("ADDRESS_OWNER");
-
         usdce.updatePauser(pauser);
+        console.log("Updated pauser to address: %s", pauser);
         usdce.updateBlacklister(blacklister);
+        console.log("Updated blacklister to address: %s", blacklister);
         usdce.updateMasterMinter(masterMinter);
+        console.log("Updated master minter to address: %s", masterMinter);
         usdce.transferOwnership(owner);
+        console.log("Transferred ownership to address: %s", owner);
 
         require(
             usdce.pauser() != deployerAddress,
