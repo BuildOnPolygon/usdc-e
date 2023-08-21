@@ -106,12 +106,12 @@ contract DeployInitUSDCE is Script {
             minterAllowedAmount
         );
         usdce.configureMinter(
-            vm.envAddress("ADDRESS_NATIVE_CONVER_PROXY"),
+            vm.envAddress("ADDRESS_NATIVE_CONVERTER_PROXY"),
             minterAllowedAmount
         );
         console.log(
             "Configured nativeConverter with address %s as minter with allowance: %s",
-            vm.envAddress("ADDRESS_NATIVE_CONVER_PROXY"),
+            vm.envAddress("ADDRESS_NATIVE_CONVERTER_PROXY"),
             minterAllowedAmount
         );
     }
