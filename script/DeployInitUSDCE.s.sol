@@ -24,6 +24,7 @@ pragma solidity 0.6.12;
 
 import "forge-std/Script.sol";
 import "../src/usdc-impl/FiatTokenV2_1.sol";
+import "../src/usdc-proxy/FiatTokenProxy.sol";
 
 /// @notice This script deploys and initializes the USDC-e token. It also
 /// configures the zkMinterBurnerProxy and the nativeConverterProxy from the usdc-lxly repo
@@ -31,18 +32,25 @@ import "../src/usdc-impl/FiatTokenV2_1.sol";
 /// addresses
 contract DeployInitUSDCE is Script {
     function run() external {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address deployerAddress = vm.addr(deployerPrivateKey);
-        vm.startBroadcast(deployerPrivateKey);
-
+        // retrieve required values for initialization
         uint256 minterAllowedAmount = vm.envUint("MINTER_ALLOWED_AMOUNT");
-
         address masterMinter = vm.envAddress("ADDRESS_MASTER_MINTER");
         address pauser = vm.envAddress("ADDRESS_PAUSER");
         address blacklister = vm.envAddress("ADDRESS_BLACKLISTER");
         address owner = vm.envAddress("ADDRESS_OWNER");
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        address deployerAddress = vm.addr(deployerPrivateKey);
 
-        FiatTokenV2_1 usdce = deployUSDCE();
+        vm.startBroadcast(deployerPrivateKey);
+
+        // deploy USDC implementation and proxy
+        address payable usdceProxyAddr = deployUSDCE();
+        // change proxy admin so we can call init after (fallback requires caller != admin)
+        FiatTokenProxy usdceProxy = FiatTokenProxy(usdceProxyAddr);
+        usdceProxy.changeAdmin(owner);
+
+        // now we can initialize through the proxy
+        FiatTokenV2_1 usdce = FiatTokenV2_1(usdceProxyAddr);
         initializeAndConfigureMinters(
             usdce,
             deployerAddress,
@@ -60,9 +68,12 @@ contract DeployInitUSDCE is Script {
         vm.stopBroadcast();
     }
 
-    function deployUSDCE() internal returns (FiatTokenV2_1) {
-        FiatTokenV2_1 usdce = new FiatTokenV2_1();
-        console.log("Deployed USDCE at address: %s", address(usdce));
+    function deployUSDCE() internal returns (address payable) {
+        FiatTokenV2_1 usdceImpl = new FiatTokenV2_1();
+        FiatTokenProxy usdceProxy = new FiatTokenProxy(address(usdceImpl));
+        address payable usdce = address(usdceProxy);
+
+        console.log("Deployed USDCE at address: %s", usdce);
         return usdce;
     }
 
