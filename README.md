@@ -2,9 +2,9 @@
 
 ## Description
 
-- USDC.e (zkEVM) - This contract will match the current USDC contract deployed on Ethereum, with all expected features. Its contract address will be different from the current "wrapped" USDC in use today, and will have the ability to issue and burn tokens as well as "blacklist" addresses.
+- [USDC.e](https://zkevm.polygonscan.com/address/0x37eAA0eF3549a5Bb7D431be78a3D99BD360d19e5) (zkEVM) - This contract will match the current USDC contract deployed on Ethereum, with all expected features. Its contract address will be different from the current "wrapped" USDC in use today, and will have the ability to issue and burn tokens as well as "blacklist" addresses.
 
-## Contracts
+## Source Code of Contracts
 
 - FiatTokenProxy - USDC's proxy contract (effectively the token address that users interact with)
 - FiatTokenV2_1 - implementation of the USDC contract (can be modified through upgrades)
