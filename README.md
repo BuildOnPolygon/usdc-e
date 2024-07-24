@@ -1,6 +1,8 @@
-## THIS REPO IS DEPRECATED - PLEASE USE [CIRCLE'S OFFICIAL USDC REPO](https://github.com/circlefin/stablecoin-evm/)
+## USE [CIRCLE'S OFFICIAL BRIDGE STANDARD USDC REPO](https://github.com/circlefin/stablecoin-evm/)
 
-Circle's official USDC repo: https://github.com/circlefin/stablecoin-evm/
+This repo contains the "unofficial bridge standard" for USDC, implemented before Circle's.
+
+Since Circle now has an official Bridge Standard USDC repo, we are pointing users towards it: https://github.com/circlefin/stablecoin-evm/
 
 Note: if you have an existing USDC-e deployment on your CDK chain, and want to update to 2.2, you must deploy all of the contracts in Circle's repo, and then perform the upgrade to your FiatTokenProxy.
 
